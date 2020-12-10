@@ -1,5 +1,6 @@
 import string
 import re
+import secrets
 
 from flask import (
     Flask,
@@ -15,7 +16,7 @@ import orm
 
 
 app = Flask(__name__)
-app.secret_key = '59d0e95aa82f4c63b2138dadaa8c1c31'
+app.secret_key = secrets.token_hex(16)
 
 
 @app.route('/')
