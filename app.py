@@ -33,40 +33,31 @@ def login():
         login = request.form['login']
         password = request.form['password']
 
-        print(login, password)
-        print(type(login), type(password))
-
         user = orm.check_credential(login, password)
-        print(user)
         if user is None:
             return render_template('login.html', wrong_password=True)
         else:
-            nonce = bytes.fromhex(user.nonce)
-            
-            global kms
-            mobile_phone_hash = kms.decrypt(
-                user.login, 
-                user.mobile_phone_hash,
-                nonce)
-            mobile_phone_hash = mobile_phone_hash.decode(encoding='ascii')
-            
-            session['user'] = {
-                'login': user.login,
-                'full_name': user.full_name,
-                'email': user.email,
-                'mobile_phone': mobile_phone_hash
-            }
-            print(session)
+            session['user'] = adapt_user(user)
             return redirect(url_for('profile'))
 
     return render_template('login.html')
 
 
-@app.route('/profile')
-def profile():
-    if session['user'] is None:
-        return redirect(url_for(login))
-    return render_template('profile.html', user=session['user'])
+@app.route('/profile', defaults={'login': None})
+@app.route('/profile/<login>')
+def profile(login):
+    adapted_user = None
+    if not(login is None):
+        user = orm.get_user(login)
+        if not(user is None):
+            adapted_user = adapt_user(user)
+    else:
+        adapted_user = session.get('user', None)
+
+    if adapted_user is None:
+        return redirect(url_for('login'))
+
+    return render_template('profile.html', user=adapted_user)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -112,8 +103,30 @@ def check_password(pwd):
     if not password_re.search(pwd):
         return False
     return True
-        
+
+
+def adapt_user(user):
+    global kms
+    mobile_phone_hash = kms.decrypt(
+        user.login, 
+        bytes.fromhex(user.mobile_phone_hash),
+        bytes.fromhex(user.nonce))
+    mobile_phone_hash = mobile_phone_hash.decode(encoding='ascii')
+    
+    return {
+        'login': user.login,
+        'full_name': user.full_name,
+        'email': user.email,
+        'mobile_phone': mobile_phone_hash
+    }
 
 if __name__ == '__main__':
     app.run(debug=True)
 
+# User example
+# 
+# Login: alexandr
+# Password: !11QQqqqw 
+# 
+# Login: ibah
+# Password: 11He!Tq2ps 

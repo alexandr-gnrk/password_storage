@@ -35,9 +35,7 @@ Base.metadata.create_all(engine)
 
 
 def check_credential(login, password):
-    user = session.query(User).\
-        filter(User.login == login).\
-        first()
+    user = get_user(login)
     if user is None:
         return None
 
@@ -47,6 +45,10 @@ def check_credential(login, password):
     else:
         return None
 
+def get_user(login):
+    return session.query(User).\
+        filter(User.login == login).\
+        first()
 
 def create_user(full_name, email, login, password, mobile_phone_hash, nonce):
     password_bytes = bytes(password, encoding='ascii')
