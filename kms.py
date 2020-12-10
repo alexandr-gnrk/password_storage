@@ -59,6 +59,6 @@ class KMS():
         return AESGCM.generate_key(bit_length=128)
 
     @classmethod
-    def generate_NONCE(cls):
+    def generate_nonce(cls):
         return secrets.token_bytes(12)
 

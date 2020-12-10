@@ -48,14 +48,16 @@ def check_credential(login, password):
         return None
 
 
-def create_user(full_name, email, login, password):
+def create_user(full_name, email, login, password, mobile_phone_hash, nonce):
     password_bytes = bytes(password, encoding='ascii')
     hashed_passsword = bcrypt.hashpw(password_bytes, bcrypt.gensalt())
     user = User( 
         full_name=full_name,
         email=email,
         login=login,
-        password_hash=hashed_passsword)
+        password_hash=hashed_passsword,
+        mobile_phone_hash=mobile_phone_hash,
+        nonce=nonce)
     session.add(user)
     session.commit()
     return user
