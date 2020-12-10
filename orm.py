@@ -24,6 +24,8 @@ class User(Base):
     email = Column(String)
     login = Column(String)
     password_hash = Column(String)
+    mobile_phone_hash = Column(String)
+    nonce = Column(String)
 
     def __repr__(self):
        return "<User(user_id='%s', full_name='%s')>" % (
