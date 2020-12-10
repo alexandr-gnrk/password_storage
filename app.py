@@ -41,7 +41,8 @@ def login():
             session['user'] = {
                 'login': user.login,
                 'full_name': user.full_name,
-                'email': user.email
+                'email': user.email,
+                'mobile_phone': 'mock'
             }
             print(session)
             return redirect(url_for('profile'))
@@ -93,4 +94,3 @@ def check_password(pwd):
 if __name__ == '__main__':
     app.run(debug=True)
 
-# !11QQqqqw
