@@ -1,13 +1,13 @@
 import bcrypt
 
 from sqlalchemy import create_engine
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, Boolean
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
 
 engine = create_engine(
-    'sqlite:///users.db',
+    'sqlite:///data/users.db',
     connect_args={'check_same_thread': False})
 Base = declarative_base()
 session = sessionmaker(bind=engine)()
@@ -26,6 +26,8 @@ class User(Base):
     password_hash = Column(String)
     mobile_phone_hash = Column(String)
     nonce = Column(String)
+    version = Column(Integer)
+    compromised = Column(Boolean)
 
     def __repr__(self):
        return "<User(user_id='%s', full_name='%s')>" % (
@@ -50,7 +52,10 @@ def get_user(login):
         filter(User.login == login).\
         first()
 
-def create_user(full_name, email, login, password, mobile_phone_hash, nonce):
+def create_user(
+        full_name, email, login, password, 
+        mobile_phone_hash, nonce,
+        version=1, compromised=False):
     password_bytes = bytes(password, encoding='ascii')
     hashed_passsword = bcrypt.hashpw(password_bytes, bcrypt.gensalt())
     user = User( 
@@ -59,7 +64,9 @@ def create_user(full_name, email, login, password, mobile_phone_hash, nonce):
         login=login,
         password_hash=hashed_passsword,
         mobile_phone_hash=mobile_phone_hash,
-        nonce=nonce)
+        nonce=nonce,
+        version=version,
+        compromised=compromised)
     session.add(user)
     session.commit()
     return user

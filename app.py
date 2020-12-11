@@ -114,7 +114,7 @@ if __name__ == '__main__':
 # User example
 # 
 # Login: alexandr
-# Password: !11QQqqqw 
+# Password: !11QQqqqw
 # 
 # Login: ibah
-# Password: 11He!Tq2ps 
+# Password: 11He!Tq2ps
