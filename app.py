@@ -1,5 +1,3 @@
-import string
-import re
 import secrets
 import ssl
 
@@ -14,6 +12,7 @@ from flask import (
 
 from kms import KMS
 import orm
+import paswd
 
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(16)
@@ -68,7 +67,10 @@ def register():
         email = request.form['email']
         mobile_phone = request.form['mobile_phone']
 
-        if not check_password(password):
+        if not paswd.ensure_not_common(password):
+            err_message = 'Your can not use common used password. Try to make it harder.'
+            return render_template('register.html', err_message=err_message)
+        elif not paswd.ensure_hard(password):
             err_message = ('Your password should have at least one special charachter,'+
                 'two digits, two uppercase and three lowercase charachter. Length: 8+ characters.')
             return render_template('register.html', err_message=err_message)
@@ -89,21 +91,6 @@ def register():
     return render_template('register.html')
 
 
-def check_password(pwd):
-    password_re =  re.compile(r'''(
-        ^(?=.*[A-Z].*[A-Z])                # at least two capital letters
-        (?=.*[!@#$&*])                     # at least one of these special c-er
-        (?=.*[0-9].*[0-9])                 # at least two numeric digits
-        (?=.*[a-z].*[a-z].*[a-z])          # at least three lower case letters
-        .{8,}                              # at least 8 total digits
-        $
-        )''', re.VERBOSE)
-    
-    if not password_re.search(pwd):
-        return False
-    return True
-
-
 def adapt_user(user):
     global kms
     mobile_phone_hash = kms.decrypt(
@@ -122,7 +109,7 @@ def adapt_user(user):
 if __name__ == '__main__':
     context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
     context.load_cert_chain('./data/cert.crt', './data/key.pem')
-    app.run(debug=True, ssl_context=context)
+    app.run(debug=False, ssl_context=context)
 
 # User example
 # 
