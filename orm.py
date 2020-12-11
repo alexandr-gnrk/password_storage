@@ -1,4 +1,8 @@
+import base64
+import hashlib
+
 import bcrypt
+
 
 from sqlalchemy import create_engine
 from sqlalchemy import Column, Integer, String, Boolean
@@ -42,7 +46,7 @@ def check_credential(login, password):
         return None
 
     password_bytes = bytes(password, encoding='ascii')
-    if bcrypt.checkpw(password_bytes, user.password_hash):
+    if bcrypt.checkpw(pre_hash(password_bytes), user.password_hash):
         return user
     else:
         return None
@@ -57,7 +61,11 @@ def create_user(
         mobile_phone_hash, nonce,
         version=1, compromised=False):
     password_bytes = bytes(password, encoding='ascii')
-    hashed_passsword = bcrypt.hashpw(password_bytes, bcrypt.gensalt())
+    
+    hashed_passsword = bcrypt.hashpw(
+        pre_hash(password_bytes), 
+        bcrypt.gensalt())
+    
     user = User( 
         full_name=full_name,
         email=email,
@@ -70,3 +78,8 @@ def create_user(
     session.add(user)
     session.commit()
     return user
+
+
+def pre_hash(pwd):
+    return base64.b64encode(
+        hashlib.sha256(pwd).digest())
