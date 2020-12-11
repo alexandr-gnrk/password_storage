@@ -1,10 +1,10 @@
 import string
 import re
 import secrets
+import ssl
 
 from flask import (
     Flask,
-    g,
     redirect,
     render_template,
     request,
@@ -14,7 +14,6 @@ from flask import (
 
 from kms import KMS
 import orm
-
 
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(16)
@@ -121,7 +120,9 @@ def adapt_user(user):
     }
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+    context.load_cert_chain('./data/cert.crt', './data/key.pem')
+    app.run(debug=True, ssl_context=context)
 
 # User example
 # 
