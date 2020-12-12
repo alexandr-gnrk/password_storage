@@ -15,7 +15,8 @@ class KMS():
     def __init__(self):
         self.KEK = os.environ.get(self.KEK_ENV_VAR_NAME)
         if self.KEK is None:
-            raise Exception('KEK environment variable is not set.')
+            self.KEK = 'e2b1879f0759d0348ade22dfc0df56ef'
+            #raise Exception('KEK environment variable is not set.')
 
         self.KEK = bytes().fromhex(self.KEK)
         self.DEKs = self.load_DEKs()
